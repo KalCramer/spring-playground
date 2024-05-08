@@ -20,15 +20,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import io.hawt.system.ConfigManager;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.ConfigurableWebApplicationContext;
 
 @SpringBootTest
 @AutoConfigureMockMvc //(addFilters = false)
+@ContextConfiguration(initializers = GreetingControllerTests.HawtioContextInitializer.class)
 public class GreetingControllerTests {
 
 	@Autowired
@@ -47,6 +52,13 @@ public class GreetingControllerTests {
 		this.mockMvc.perform(get("/greeting").param("name", "Spring Community"))
 				.andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$.content").value("Hello, Spring Community!"));
+	}
+
+	public static class HawtioContextInitializer implements ApplicationContextInitializer<ConfigurableWebApplicationContext> {
+		@Override
+		public void initialize(ConfigurableWebApplicationContext applicationContext) {
+			applicationContext.getServletContext().setAttribute(ConfigManager.CONFIG_MANAGER, new ConfigManager());
+		}
 	}
 
 }
